@@ -1,35 +1,41 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import { WagmiProvider } from "wagmi";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { config } from "./wagmi-config";
+import { SolanaWalletProvider } from "./providers/solana-wallet-provider";
+import { EvmWalletConnect } from "./components/evm-wallet-connect";
+import { SolanaWalletConnect } from "./components/solana-wallet-connect";
+import "./App.css";
+
+const queryClient = new QueryClient();
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [evmAddress, setEvmAddress] = useState<string | null>(null);
+  const [solanaAddress, setSolanaAddress] = useState<string | null>(null);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <QueryClientProvider client={queryClient}>
+      <WagmiProvider config={config}>
+        <SolanaWalletProvider>
+          <div className="App">
+            <h1>Multi-Chain Wallet</h1>
+
+            <div style={{ marginBottom: "2rem" }}>
+              <h2>EVM Wallet</h2>
+              <EvmWalletConnect onAddressChange={setEvmAddress} />
+              <div>Address: {evmAddress || "Not connected"}</div>
+            </div>
+
+            <div style={{ marginBottom: "2rem" }}>
+              <h2>Solana Wallet</h2>
+              <SolanaWalletConnect onAddressChange={setSolanaAddress} />
+              <div>Address: {solanaAddress || "Not connected"}</div>
+            </div>
+          </div>
+        </SolanaWalletProvider>
+      </WagmiProvider>
+    </QueryClientProvider>
+  );
 }
 
-export default App
+export default App;
